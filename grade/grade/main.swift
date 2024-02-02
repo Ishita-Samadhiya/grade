@@ -1,40 +1,52 @@
-//
 //  main.swift
 //  grade
 //
 //  Created by StudentAM on 1/29/24.
-//
 
 import Foundation
 import CSV
-var grades: [[Double]] = []
-var names: [String] = []
-var namesLower: [String] = []
-var avg: [Double] = []
-var opt: Int = 0
-do{
+
+// Arrays to store data
+var grades: [[Double]] = [] // Stores grades of all students for all assignments
+var names: [String] = [] // Stores names of all students
+var namesLower: [String] = [] // Stores lowercase names for case-insensitive search
+var avg: [Double] = [] // Stores average grade for each student
+var opt: Int = 0 // Stores user's menu choice
+
+// Reading CSV file
+do {
     let stream = InputStream(fileAtPath: "/Users/studentam/Desktop/Apps/grade/grade/grade/grades.csv")
     let csv = try CSVReader(stream: stream!)
-    while var row = csv.next(){
+    while let row = csv.next() {
+        // Adding student name to arrays
         names.append(row[0])
         namesLower.append(row[0].lowercased())
+        
+        // Calculating grades and average
         var grade: [Double] = []
         var sum = 0.0
-        for i in 1..<row.count{
+        for i in 1..<row.count {
             grade.append(Double(row[i])!)
-            sum += grade[i-1]
+            sum += grade[i - 1]
         }
         grades.append(grade)
         avg.append(sum/Double(grade.count))
     }
-}catch{
+} catch {
     print("There was an error trying to read the file!")
 }
-while opt != -1{
+
+// Main menu loop
+while opt != -1 {
+    // Displaying menu options
     print("\nWelcome to the Grade Manager!\nWhat would you like to do? (Enter the number):")
     print("1. Display grade of a single student\n2. Display all grades for a student\n3. Display all grades of ALL students\n4. Find the average grade of the class\n5. Find the average grade of an assignment\n6. Find the lowest grade in the class\n7. Find the highest grade of the class\n8. Filter students by grade range\n9. Change a student's grade\n10. Quit")
+    
+    // Reading user input
     opt = Int(readLine()!)!
-    switch opt{
+    
+    // Switch case based on user's choice
+    switch opt {
         case 1:
             displaySingle()
         case 2:
@@ -62,51 +74,159 @@ while opt != -1{
     }
 }
 
-func displaySingle(){
+// Function to display grade of a single student
+func displaySingle() {
+    // Prompting user to input the name of the student
     print("Which student would you like to choose?")
     let name = readLine()!
+    // Finding the index of the student in the lowercase names array
     let ind = namesLower.firstIndex(of: name.lowercased())
-    if(ind != nil){
+    // Checking if the student exists
+    if ind != nil {
+        // Printing the grade of the student
         print("\(names[ind!])'s grade in the class is \(avg[ind!])")
-    }else{
-        print("Please enter a valid name!");
+    } else {
+        // If the student name is not valid, prompting the user to enter a valid name
+        print("Please enter a valid name!")
+        displaySingle()
     }
 }
-func displayStudent(){
+
+// Function to display all grades for a student
+func displayStudent() {
+    // Prompting user to input the name of the student
     print("Which student would you like to choose?")
     let name = readLine()!
+    // Finding the index of the student in the lowercase names array
     let ind = namesLower.firstIndex(of: name.lowercased())
-    if(ind != nil){
+    // Checking if the student exists
+    if ind != nil {
+        // Printing all grades of the student
         print("\(names[ind!])'s grades for this class are:")
-        for i in 0..<grades[ind!].count-1{
+        for i in 0..<grades[ind!].count - 1 {
             print("\(grades[ind!][i]), ", terminator: "")
         }
-        print(grades[ind!][(grades[ind!].count)-1])
-    }else{
-        print("Please enter a valid name!");
+        print(grades[ind!][(grades[ind!].count) - 1])
+    } else {
+        // If the student name is not valid, prompting the user to enter a valid name
+        print("Please enter a valid name!")
+        displayStudent()
     }
 }
-func displayAll(){
-    for ind in 0..<names.count{
+
+// Function to display all grades of all students
+func displayAll() {
+    for ind in 0..<names.count {
+        // Printing all grades of each student
         print("\(names[ind])'s grades are: ", terminator: "")
-        for i in 0..<grades[ind].count-1{
+        for i in 0..<grades[ind].count - 1 {
             print("\(grades[ind][i]), ", terminator: "")
         }
-        print(grades[ind][(grades[ind].count)-1])
+        print(grades[ind][(grades[ind].count) - 1])
     }
 }
-func classAverage(){
+
+// Function to calculate class average
+func classAverage() {
     var sum = 0.0
-    for num in avg{
-        sum+=num
+    for num in avg {
+        sum += num
     }
-    let average = sum/Double(avg.count)
-    print("The class average is: \(round(average*100)/100)")
+    // Calculating the average grade of the class
+    let average = sum / Double(avg.count)
+    print("The class average is: \(round(average * 100) / 100)")
 }
-func assignAverage(){}
-func lowest(){}
-func highest(){}
-func filterByGrade(){}
-func change(){
-    
+
+// Function to find average grade of an assignment
+func assignAverage() {
+    // Prompting user to input the assignment number
+    print("Which assignment would you like to get the average of (1-10):")
+    let ind = Int(readLine()!)!
+    // Checking if the assignment number is valid
+    if ind < avg.count && ind > 0 {
+        // Calculating the average grade of the assignment
+        var sum = 0.0
+        for i in 0..<grades.count {
+            sum += grades[i][ind - 1]
+        }
+        let average = sum / Double(grades.count)
+        print("The average for assignment #\(ind) is \(round(average * 100) / 100)")
+    } else {
+        // If the assignment number is not valid, prompting the user to enter a valid assignment
+        print("Please enter a valid assignment!")
+        assignAverage()
+    }
+}
+
+// Function to find the student with the lowest grade
+func lowest() {
+    // Finding the index of the student with the lowest grade
+    let ind = avg.firstIndex(of: avg.min()!)
+    // Printing the name and grade of the student with the lowest grade
+    print("\(names[ind!]) is the student with the lowest grade: \(avg[ind!])")
+}
+
+// Function to find the student with the highest grade
+func highest() {
+    // Finding the index of the student with the highest grade
+    let ind = avg.firstIndex(of: avg.max()!)
+    // Printing the name and grade of the student with the highest grade
+    print("\(names[ind!]) is the student with the highest grade: \(avg[ind!])")
+}
+
+// Function to filter students by grade range
+func filterByGrade() {
+    // Prompting user to input the low range for grade filtering
+    print("Enter the low range you would like to use:")
+    let min = Double(readLine()!)!
+    // Prompting user to input the high range for grade filtering
+    print("Enter the high range you would like to use:")
+    let max
+
+ = Double(readLine()!)!
+    // Filtering students based on grade range and printing their names and grades
+    for i in 0..<avg.count {
+        if avg[i] > min && avg[i] < max {
+            print("\(names[i]): \(avg[i])")
+        }
+    }
+}
+
+// Function to change a student's grade
+func change() {
+    // Prompting user to input the name of the student
+    print("Which student would you like to choose?")
+    let name = readLine()!
+    // Finding the index of the student in the lowercase names array
+    let ind = namesLower.firstIndex(of: name.lowercased())
+    // Checking if the student exists
+    if ind != nil {
+        // Prompting user to input the assignment number
+        print("Which assignment would you like to change grade for of (1-10):")
+        let ass = Int(readLine()!)!
+        // Checking if the assignment number is valid
+        if ass < avg.count+1 && ass > 0 {
+            // Prompting user to input the new grade
+            print("What do you want to change the grade to:")
+            let grade = Double(readLine()!)!
+            // Updating the grade for the specified assignment
+            grades[ind!][ass - 1] = grade
+            // Calculating the new average grade for the student
+            var sum = 0.0
+            for i in 0..<grades[0].count {
+                sum += grades[ind!][i]
+            }
+            let average = sum / 10.0
+            // Printing the updated grade and final grade for the student
+            print("\(names[ind!])'s new grade for assignment \(ass) is \(grade). \(names[ind!])'s new final grade is \(average)")
+        } else {
+            // If the assignment number is not valid, prompting the user to enter a valid assignment
+            print("Please enter a valid assignment!")
+            change()
+        }
+    } else {
+        // If the student name is not valid, prompting the user to enter a valid name
+        print("Please enter a valid name!")
+        change()
+    }
 }
